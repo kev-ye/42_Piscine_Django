@@ -20,11 +20,17 @@ def all_in(args):
             "CO": "Denver"
         }
 
-        mapped = dict(zip(capital_cities.values(), states.keys()))
-        try:
-            print(mapped[args[1]])
-        except KeyError:
-            print("Unknown capital city")
+        mapped_c_s = dict(zip(capital_cities.values(), states.keys()))
+        mapped_s_c = dict(zip(states.keys(), capital_cities.values()))
+
+        for data in [new_d for d in args[1].split(',') if (new_d := d.strip())]:
+            title = data.title()
+            if title in mapped_c_s.keys():
+                print(f"{title} is the capital of {mapped_c_s[title]}")
+            elif title in mapped_s_c.keys():
+                print(f"{mapped_s_c[title]} is the capital of {title}")
+            else:
+                print(f"{data} is neither a capital city nor a state")
 
 
 if __name__ == '__main__':
