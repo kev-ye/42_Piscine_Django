@@ -34,18 +34,32 @@ def handle_args(argv: list):
         return False
     return True
 
-def render(argv: list):
+def render_html(file_name: str, template_data: str, settings_data: dict, ls_data_to_replace: list):
+    for data in ls_data_to_replace:
+        template_data = template_data.replace('{' + data + '}', str(settings_data[data]))
+
+    try:
+        with open(file_name, 'w') as html_f:
+            html_f.write(template_data)
+    except PermissionError:
+        print('Cannot write to file', file=sys.stderr)
+
+
+def render(argv: list, settings_data: dict):
     if not handle_args(argv):
         print('Usage: python render.py <file.template>', file=sys.stderr)
         return
 
     if template_data := load_template(argv[1]):
-        res = re.findall(r'{([^{]*?)}', template_data)
-        print('->', res)
+        ls_data_to_replace = re.findall(r'{([^{]*?)}', template_data)
+
+        if (ls_data_to_replace := set(ls_data_to_replace)) - set(settings_data.keys()):
+            print('All keys in template must be in settings.py', file=sys.stderr)
+            return
+        
+        html_name = argv[1][:-9] + '.html'
+        render_html(html_name, template_data, settings_data, ls_data_to_replace)
 
 
 if __name__ == '__main__':
-    print(settings_data)
-    print('len:', len(settings_data))
-
-    render(sys.argv)
+    render(sys.argv, settings_data)
